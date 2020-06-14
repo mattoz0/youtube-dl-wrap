@@ -1,5 +1,7 @@
 # youtube-dl-wrap
 
+![](https://github.com/ghjbnm/youtube-dl-wrap/workflows/Node.js%20CI/badge.svg)
+
 A simple node.js wrapper for youtube-dl.
 
 * 0 dependencies
