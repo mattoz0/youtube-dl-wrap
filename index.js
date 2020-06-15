@@ -85,9 +85,12 @@ class YoutubeDlWrap
 
             execEventEmitter.emit("stdout", stringData);
         });
+
+        let stdErrData = "";
         youtubeDlProcess.stderr.on('data', (data) => 
         {
             let stringData = data.toString();
+            stdErrData += stringData;
             execEventEmitter.emit("stderr", stringData);
         });
 
@@ -99,7 +102,12 @@ class YoutubeDlWrap
             if(code === 0)
                 execEventEmitter.emit("close", code);
             else
-                execEventEmitter.emit("error", code + " - " + errorMessage);
+            {
+                let errorString = code;
+                errorString += errorMessage ? " - " + errorMessage : "";
+                errorString += stdErrData   ? " - " + stdErrData   : "";
+                execEventEmitter.emit("error", errorString);
+            }
         });
 
         return execEventEmitter;
