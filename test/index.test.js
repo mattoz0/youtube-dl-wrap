@@ -49,10 +49,10 @@ describe('promise functions', function()
 
     describe('version', function ()
     {
-        it('should be a date', async function()
+        it('should start with a date', async function()
         {
             let versionString = await youtubeDlWrap.getVersion();
-            assert(!isNaN( Date.parse( versionString.replace(/\./g, "-") ) ));
+            assert(!isNaN( Date.parse( versionString.substring(0, 10).replace(/\./g, "-") ) ));
         });
     });
 
