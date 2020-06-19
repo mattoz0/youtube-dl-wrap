@@ -3,7 +3,7 @@
 ![](https://github.com/ghjbnm/youtube-dl-wrap/workflows/Node.js%20CI/badge.svg)
 <a href="https://npmjs.org/package/youtube-dl-wrap" title="View this project on NPM"><img src="https://img.shields.io/npm/v/youtube-dl-wrap.svg" alt="NPM version" /></a>
 
-A simple node.js wrapper for youtube-dl.
+A simple node.js wrapper for [youtube-dl](https://github.com/ytdl-org/youtube-dl).
 
 * 0 dependencies
 * EventEmitter and Promise interface
