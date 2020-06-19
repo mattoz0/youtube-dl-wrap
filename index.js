@@ -88,7 +88,7 @@ class YoutubeDlWrap
             execEventEmitter.emit("stdout", stringData);
         });
 
-        let stdErrData = "";
+        let stderrData = "";
         youtubeDlProcess.stderr.on('data', (data) => 
         {
             let stringData = data.toString();
@@ -96,15 +96,15 @@ class YoutubeDlWrap
             execEventEmitter.emit("stderr", stringData);
         });
 
-        let errorMessage = "";
-        youtubeDlProcess.on('error', (errorMsg) => {
-            errorMessage = errorMsg;
+        let processError = "";
+        youtubeDlProcess.on('error', (error) => {
+            processError = error;
         });
         youtubeDlProcess.on('close', (code) => {
             if(code === 0)
                 execEventEmitter.emit("close", code);
             else
-                execEventEmitter.emit("error", code, errorMessage, stdErrData);
+                execEventEmitter.emit("error", code, processError, stderrData);
         });
 
         return execEventEmitter;
@@ -118,7 +118,7 @@ class YoutubeDlWrap
             execFile(this.binaryPath, youtubeDlArguments, options, (error, stdout, stderr) =>
             {
                 if(error)
-                    reject(error);
+                    reject({processError: error, stderr: stderr});
                 resolve(stdout);
             });
         });
@@ -132,13 +132,13 @@ class YoutubeDlWrap
         readStream._read = function(){};
         const youtubeDlProcess = spawn(this.binaryPath, youtubeDlArguments, options);
 
-        let errorMessage = "";
-        let stdErrData = "";
+        let processError = "";
+        let stderrData = "";
         youtubeDlProcess.stdout.on('data', (data) => readStream.push(data));
-        youtubeDlProcess.stderr.on('data', (data) => stdErrData += data.toString());
-        youtubeDlProcess.on('error', (errorMsg) => errorMessage = errorMsg );
+        youtubeDlProcess.stderr.on('data', (data) => stderrData += data.toString());
+        youtubeDlProcess.on('error', (error) => processError = error );
         youtubeDlProcess.on('close', (code) => {
-            readStream.destroy(code != 0 ? "error - " + code + " - " + errorMessage + " - " + stdErrData : false);
+            readStream.destroy(code == 0 ? false : "error - " + code + " - " + processError + " - " + stderrData);
         });
         return readStream;
     }

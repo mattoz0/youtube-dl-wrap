@@ -19,7 +19,7 @@ const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
 youtubeDlWrap.exec(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "-f", "best", "-o", "output.mp4"])
   .on("progress", (progressObject) => console.log(progressObject.percent, progressObject.eta) )
-  .on("error", (errorMessage) => console.error("An error occured", errorMessage) )
+  .on("error", (exitCode, processError, stderr) => console.error("An error occured", exitCode, processError, stderr) )
   .on("close", () => console.log("All done") );
 
 //Execute using a Promise
