@@ -1,5 +1,6 @@
 const EventEmitter = require('events').EventEmitter
 const execFile = require('child_process').execFile;
+const Readable = require('stream').Readable;
 const spawn = require('child_process').spawn;
 
 class YoutubeDlWrap
@@ -69,6 +70,7 @@ class YoutubeDlWrap
             options.maxBuffer = 1024 * 1024 * 1024;
         return options;
     }
+
     exec(youtubeDlArguments = [], options = {})
     {
         options = this.setDefaultOptions(options);
@@ -102,12 +104,7 @@ class YoutubeDlWrap
             if(code === 0)
                 execEventEmitter.emit("close", code);
             else
-            {
-                let errorString = code;
-                errorString += errorMessage ? " - " + errorMessage : "";
-                errorString += stdErrData   ? " - " + stdErrData   : "";
-                execEventEmitter.emit("error", errorString);
-            }
+                execEventEmitter.emit("error", code, errorMessage, stdErrData);
         });
 
         return execEventEmitter;
@@ -125,6 +122,25 @@ class YoutubeDlWrap
                 resolve(stdout);
             });
         });
+    }
+
+    execStream(youtubeDlArguments = [], options = {})
+    {
+        const readStream = new Readable();
+        options = this.setDefaultOptions(options);
+        youtubeDlArguments = youtubeDlArguments.concat(["-o", "-"]);
+        readStream._read = function(){};
+        const youtubeDlProcess = spawn(this.binaryPath, youtubeDlArguments, options);
+
+        let errorMessage = "";
+        let stdErrData = "";
+        youtubeDlProcess.stdout.on('data', (data) => readStream.push(data));
+        youtubeDlProcess.stderr.on('data', (data) => stdErrData += data.toString());
+        youtubeDlProcess.on('error', (errorMsg) => errorMessage = errorMsg );
+        youtubeDlProcess.on('close', (code) => {
+            readStream.destroy(code != 0 ? "error - " + code + " - " + errorMessage + " - " + stdErrData : false);
+        });
+        return readStream;
     }
 
     parseProgress(progressLine)
