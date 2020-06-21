@@ -22,7 +22,7 @@ const YoutubeDlWrap = require("youtube-dl-wrap");
 let githubReleasesData = await YoutubeDlWrap.getGithubReleases(1, 5);
 
 //Download the youtube-dl binary for the given version and platform to the provided path.
-//By default the latest version will be downloaded to "./youtube-dl" and platform equals os.platform().
+//By default the latest version will be downloaded to "./youtube-dl" and platform = os.platform().
 await YoutubeDlWrap.downloadYoutubeDl("path/to/youtube-dl/binary", "2020.06.16.1", "win32");
 
 //Init an instance with a given binary path.
@@ -42,8 +42,8 @@ const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
 //Execute using an EventEmitter
 youtubeDlWrap.exec(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "-f", "best", "-o", "output.mp4"])
-  .on("progress", (progressObject) => 
-    console.log(progressObject.percent, progressObject.totalSize, progressObject.currentSpeed, progressObject.eta))
+  .on("progress", (progress) => 
+    console.log(progress.percent, progress.totalSize, progress.currentSpeed, progress.eta))
   .on("error", (exitCode, processError, stderr) => 
     console.error("An error occured", exitCode, processError, stderr))
   .on("close", () => console.log("All done"));
