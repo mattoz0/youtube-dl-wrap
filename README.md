@@ -11,6 +11,29 @@ A simple node.js wrapper for [youtube-dl](https://github.com/ytdl-org/youtube-dl
 * Utility functions
 
 ## Usage
+
+Youtube-dl will not be automatically downloaded.
+Provide it yourself or use some of the following functions to download the binary.
+
+```javascript
+const YoutubeDlWrap = require("youtube-dl-wrap");
+
+//Get the data from the github releases API. In this case get page 1 with a maximum of 5 items.
+let githubReleasesData = await YoutubeDlWrap.getGithubReleases(1, 5);
+
+//Download the youtube-dl binary for the given version and platform to the provided path.
+//By default the platform will be detected by os.platform() and the latest version will be downloaded to "./youtube-dl".
+await YoutubeDlWrap.downloadYoutubeDl("path/to/youtube-dl/binary", "2020.06.16.1", "win32");
+
+//Init an instance with a given binary path. If none is provided "youtube-dl" will be used as command.
+const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
+//The binary path can also be changed later on.
+youtubeDlWrap.setBinaryPath("path/to/another/youtube-dl/binary");
+```
+
+
+To interface with youtube-dl the following methods can be used.
+
 ```javascript
 const YoutubeDlWrap = require("youtube-dl-wrap");
 const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
@@ -18,7 +41,7 @@ const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
 //Execute using an EventEmitter
 youtubeDlWrap.exec(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "-f", "best", "-o", "output.mp4"])
-  .on("progress", (progressObject) => console.log(progressObject.percent, progressObject.eta) )
+  .on("progress", (progressObject) => console.log(progressObject.percent, progressObject.totalSize, progressObject.currentSpeed, progressObject.eta) )
   .on("error", (exitCode, processError, stderr) => console.error("An error occured", exitCode, processError, stderr) )
   .on("close", () => console.log("All done") );
 

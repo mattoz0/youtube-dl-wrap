@@ -1,12 +1,42 @@
 const assert = require("assert");
 const fs = require("fs");
+const os = require("os");
 
 const YoutubeDlWrap = require("..");
 const youtubeDlWrap = new YoutubeDlWrap();
 
-describe('event emitter function', function()
+const isValidVersion = (version) => !isNaN( Date.parse( version.substring(0, 10).replace(/\./g, "-") ) )
+
+
+describe("fetching data from github", function()
 {
-    it('should download a video', function(done)
+    describe("fetching release data", function()
+    {
+        it("should return an array with 1 release object", async function()
+        {
+            let releaseData = await YoutubeDlWrap.getGithubReleases(1, 1);
+            assert.equal(releaseData.length, 1);
+            assert(isValidVersion(releaseData[0].tag_name));
+        });
+    });
+
+    describe("downloading youtube-dl binary", function()
+    {
+        it("should create a file", async function()
+        {
+            await YoutubeDlWrap.downloadYoutubeDl();
+            let fileName = os.platform() == "win32" ? "youtube-dl.exe" : "youtube-dl";
+            assert(fs.existsSync("./" + fileName));
+            const stats = fs.statSync("./" + fileName);
+            fs.unlinkSync("./" + fileName);
+            assert(stats.size > 0);
+        });
+    });
+});
+
+describe("event emitter function", function()
+{
+    it("should download a video", function(done)
     {
         let youtubeDlEventEmitter = youtubeDlWrap.exec(["https://www.youtube.com/watch?v=C0DPdy98e4c",
             "-f", "worst", "-o", "test/testVideo.mp4"]);
@@ -31,9 +61,9 @@ describe('event emitter function', function()
     });    
 });
 
-describe('stream function', function()
+describe("stream function", function()
 {
-    it('should download a video', function(done)
+    it("should download a video", function(done)
     {
         let stdoutReadstream = youtubeDlWrap.execStream(["https://www.youtube.com/watch?v=C0DPdy98e4c",
             "-f", "worst"]);
@@ -49,29 +79,29 @@ describe('stream function', function()
     });    
 });
 
-describe('promise functions', function()
+describe("promise functions", function()
 {
-    describe('video Info', function ()
+    describe("video Info", function ()
     {
-        it('should have title Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film', async function()
+        it("should have title Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film", async function()
         {
             let videoInfo = await youtubeDlWrap.getVideoInfo("https://www.youtube.com/watch?v=aqz-KE-bpKQ");
             assert.equal(videoInfo.title, "Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film");
         });
     });
 
-    describe('version', function ()
+    describe("version", function()
     {
-        it('should start with a date', async function()
+        it("should start with a date", async function()
         {
             let versionString = await youtubeDlWrap.getVersion();
-            assert(!isNaN( Date.parse( versionString.substring(0, 10).replace(/\./g, "-") ) ));
+            assert(isValidVersion(versionString));
         });
     });
 
-    describe('user agent', function ()
+    describe("user agent", function()
     {
-        it('should be a string with at least 10 characters', async function()
+        it("should be a string with at least 10 characters", async function()
         {
             let userAgentString = await youtubeDlWrap.getUserAgent();
             assert.equal(typeof userAgentString, "string");
@@ -79,9 +109,9 @@ describe('promise functions', function()
         });
     });
     
-    describe('help', function ()
+    describe("help", function()
     {
-        it('should include explanation for version setting', async function()
+        it("should include explanation for version setting", async function()
         {
             let helpString = await youtubeDlWrap.getHelp();
             assert.equal(typeof helpString, "string");
@@ -89,9 +119,9 @@ describe('promise functions', function()
         });
     });
 
-    describe('extractor list', function ()
+    describe("extractor list", function()
     {
-        it('should include youtube', async function()
+        it("should include youtube", async function()
         {
             let extractorList = await youtubeDlWrap.getExtractors();
             assert(Array.isArray(extractorList));
@@ -99,13 +129,11 @@ describe('promise functions', function()
         });
     });
 
-    describe('extractor description list', function ()
+    describe("extractor description list", function()
     {
-        it('should include YouTube.com channels', async function()
+        it("should include YouTube.com channels", async function()
         {
             let extractorList = await youtubeDlWrap.getExtractorDescriptions();
-            // console.log("extractorList", extractorList)
-            // for(let a of extractorList)console.log(a);
             assert(Array.isArray(extractorList));
             assert(extractorList.includes("YouTube.com channels"));
         });

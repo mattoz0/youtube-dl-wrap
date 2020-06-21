@@ -1,7 +1,10 @@
-const EventEmitter = require('events').EventEmitter
-const execFile = require('child_process').execFile;
-const Readable = require('stream').Readable;
-const spawn = require('child_process').spawn;
+const EventEmitter = require("events").EventEmitter
+const execFile = require("child_process").execFile;
+const fs = require("fs");
+const https = require("https");
+const os = require("os");
+const Readable = require("stream").Readable;
+const spawn = require("child_process").spawn;
 
 class YoutubeDlWrap
 {
@@ -20,6 +23,45 @@ class YoutubeDlWrap
         this.binaryPath = binaryPath;
     }
 
+    static getGithubReleases(page = 1, perPage = 1)
+    {
+        return new Promise( (resolve, reject) =>
+        {
+            const apiURL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases?page=" + page + "&per_page=" + perPage;
+            https.get(apiURL, { headers: { "User-Agent": "node" } }, (response) =>
+            {
+                let resonseString = "";
+                response.setEncoding("utf8");
+                response.on("data", (body) => resonseString += body);
+                response.on("error", (e) => reject(e));
+                response.on("end", () => response.statusCode == 200 ? resolve(JSON.parse(resonseString)) : reject(response));
+            });
+        });
+    }
+
+    static async downloadYoutubeDl(filePath, version, platform = os.platform())
+    {
+        let fileName = platform == "win32" ? "youtube-dl.exe" : "youtube-dl";
+        if(!version)
+            version = (await YoutubeDlWrap.getGithubReleases(1, 1))[0].tag_name;
+        if(!filePath)
+            filePath = "./" + fileName;
+
+        return new Promise( (resolve, reject) =>
+        {
+            let binaryURL = "https://github.com/ytdl-org/youtube-dl/releases/download/" + version + "/" + fileName;
+            https.get(binaryURL, (redirectResponse) =>
+            {
+                redirectResponse.on("error", (e) => reject(e));
+                https.get(redirectResponse.headers.location, (binaryResponse) =>
+                {
+                    binaryResponse.pipe(fs.createWriteStream(filePath));
+                    binaryResponse.on("error", (e) => reject(e));
+                    binaryResponse.on("end", () => binaryResponse.statusCode == 200 ? resolve(binaryResponse) : reject(binaryResponse));
+                });
+            });
+        });
+    }
 
     async getExtractors()
     {
@@ -77,7 +119,7 @@ class YoutubeDlWrap
         const execEventEmitter = new EventEmitter();
         const youtubeDlProcess = spawn(this.binaryPath, youtubeDlArguments, options);
 
-        youtubeDlProcess.stdout.on('data', (data) =>
+        youtubeDlProcess.stdout.on("data", (data) =>
         {
             let stringData = data.toString();
             let parsedProgress = this.parseProgress(stringData);
@@ -89,7 +131,7 @@ class YoutubeDlWrap
         });
 
         let stderrData = "";
-        youtubeDlProcess.stderr.on('data', (data) => 
+        youtubeDlProcess.stderr.on("data", (data) => 
         {
             let stringData = data.toString();
             stdErrData += stringData;
@@ -97,10 +139,10 @@ class YoutubeDlWrap
         });
 
         let processError = "";
-        youtubeDlProcess.on('error', (error) => {
+        youtubeDlProcess.on("error", (error) => {
             processError = error;
         });
-        youtubeDlProcess.on('close', (code) => {
+        youtubeDlProcess.on("close", (code) => {
             if(code === 0)
                 execEventEmitter.emit("close", code);
             else
@@ -134,10 +176,10 @@ class YoutubeDlWrap
 
         let processError = "";
         let stderrData = "";
-        youtubeDlProcess.stdout.on('data', (data) => readStream.push(data));
-        youtubeDlProcess.stderr.on('data', (data) => stderrData += data.toString());
-        youtubeDlProcess.on('error', (error) => processError = error );
-        youtubeDlProcess.on('close', (code) => {
+        youtubeDlProcess.stdout.on("data", (data) => readStream.push(data));
+        youtubeDlProcess.stderr.on("data", (data) => stderrData += data.toString());
+        youtubeDlProcess.on("error", (error) => processError = error );
+        youtubeDlProcess.on("close", (code) => {
             readStream.destroy(code == 0 ? false : "error - " + code + " - " + processError + " - " + stderrData);
         });
         return readStream;

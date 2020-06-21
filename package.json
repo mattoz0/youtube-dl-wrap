@@ -4,7 +4,7 @@
   "description": "A simple node.js wrapper for youtube-dl.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 60000"
+    "test": "mocha --timeout 300000"
   },
   "author": "ghjbnm",
   "repository": {
