@@ -22,10 +22,11 @@ const YoutubeDlWrap = require("youtube-dl-wrap");
 let githubReleasesData = await YoutubeDlWrap.getGithubReleases(1, 5);
 
 //Download the youtube-dl binary for the given version and platform to the provided path.
-//By default the platform will be detected by os.platform() and the latest version will be downloaded to "./youtube-dl".
+//By default the latest version will be downloaded to "./youtube-dl" and platform equals os.platform().
 await YoutubeDlWrap.downloadYoutubeDl("path/to/youtube-dl/binary", "2020.06.16.1", "win32");
 
-//Init an instance with a given binary path. If none is provided "youtube-dl" will be used as command.
+//Init an instance with a given binary path.
+//If none is provided "youtube-dl" will be used as command.
 const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
 //The binary path can also be changed later on.
 youtubeDlWrap.setBinaryPath("path/to/another/youtube-dl/binary");
@@ -41,9 +42,11 @@ const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
 //Execute using an EventEmitter
 youtubeDlWrap.exec(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "-f", "best", "-o", "output.mp4"])
-  .on("progress", (progressObject) => console.log(progressObject.percent, progressObject.totalSize, progressObject.currentSpeed, progressObject.eta) )
-  .on("error", (exitCode, processError, stderr) => console.error("An error occured", exitCode, processError, stderr) )
-  .on("close", () => console.log("All done") );
+  .on("progress", (progressObject) => 
+    console.log(progressObject.percent, progressObject.totalSize, progressObject.currentSpeed, progressObject.eta))
+  .on("error", (exitCode, processError, stderr) => 
+    console.error("An error occured", exitCode, processError, stderr))
+  .on("close", () => console.log("All done"));
 
 //Execute using a Promise
 await youtubeDlWrap.execPromise(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
