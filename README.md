@@ -12,8 +12,7 @@ A simple node.js wrapper for [youtube-dl](https://github.com/ytdl-org/youtube-dl
 
 ## Usage
 
-Youtube-dl will not be automatically downloaded.
-
+Youtube-dl will not be automatically downloaded.\
 Provide it yourself or use some of the following functions to download the binary.
 
 ```javascript
