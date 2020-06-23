@@ -11,7 +11,7 @@ class YoutubeDlWrap
     constructor(binaryPath)
     {
         this.progressRegex = /\[download\] *(.*) of (.*) at (.*) ETA (.*)/;
-        this.setBinaryPath( binaryPath ? binaryPath : "youtube-dl");
+        this.setBinaryPath(binaryPath ? binaryPath : "youtube-dl");
     }
 
     getBinaryPath()
@@ -134,7 +134,7 @@ class YoutubeDlWrap
         youtubeDlProcess.stderr.on("data", (data) => 
         {
             let stringData = data.toString();
-            stdErrData += stringData;
+            stderrData += stringData;
             execEventEmitter.emit("stderr", stringData);
         });
 
