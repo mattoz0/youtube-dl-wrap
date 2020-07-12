@@ -39,7 +39,7 @@ To interface with youtube-dl the following methods can be used.
 const YoutubeDlWrap = require("youtube-dl-wrap");
 const youtubeDlWrap = new YoutubeDlWrap("path/to/youtube-dl/binary");
 
-//Execute using an EventEmitter
+//Execute and return an EventEmitter
 youtubeDlWrap.exec(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "-f", "best", "-o", "output.mp4"])
   .on("progress", (progress) => 
@@ -48,11 +48,11 @@ youtubeDlWrap.exec(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     console.error("An error occured", exitCode, processError, stderr))
   .on("close", () => console.log("All done"));
 
-//Execute using a Promise
+//Execute and return a Promise
 await youtubeDlWrap.execPromise(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "-f", "best", "-o", "output.mp4"]);
 
-//Execute returning a Readable Stream
+//Execute and return a Readable Stream
 let readStream = youtubeDlWrap.execStream(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "-f", "best"]);  
 
