@@ -30,11 +30,11 @@ class YoutubeDlWrap
             const apiURL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases?page=" + page + "&per_page=" + perPage;
             https.get(apiURL, { headers: { "User-Agent": "node" } }, (response) =>
             {
-                let resonseString = "";
+                let responseString = "";
                 response.setEncoding("utf8");
-                response.on("data", (body) => resonseString += body);
+                response.on("data", (body) => responseString += body);
                 response.on("error", (e) => reject(e));
-                response.on("end", () => response.statusCode == 200 ? resolve(JSON.parse(resonseString)) : reject(response));
+                response.on("end", () => response.statusCode == 200 ? resolve(JSON.parse(responseString)) : reject(response));
             });
         });
     }
