@@ -10,7 +10,7 @@ class YoutubeDlWrap
 {
     constructor(binaryPath)
     {
-        this.progressRegex = /\[download\] *(.*) of (.*) at (.*) ETA (.*)/;
+        this.progressRegex = /\[download\] *(.*) of (.*) at (.*) ETA (.*) */;
         this.setBinaryPath(binaryPath ? binaryPath : "youtube-dl");
     }
 
