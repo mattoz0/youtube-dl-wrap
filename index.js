@@ -3,7 +3,6 @@ const execFile = require("child_process").execFile;
 const fs = require("fs");
 const https = require("https");
 const os = require("os");
-const Readable = require("stream").Readable;
 const spawn = require("child_process").spawn;
 
 class YoutubeDlWrap
