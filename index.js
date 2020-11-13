@@ -4,6 +4,7 @@ const fs = require("fs");
 const https = require("https");
 const os = require("os");
 const spawn = require("child_process").spawn;
+const stream = require("stream");
 
 class YoutubeDlWrap
 {
