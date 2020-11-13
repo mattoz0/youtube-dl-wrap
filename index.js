@@ -166,23 +166,27 @@ class YoutubeDlWrap
         });
     }
 
-    execStream(youtubeDlArguments = [], options = {})
-    {
-        const readStream = new Readable();
+    execStream(youtubeDlArguments = [], options = {}) {
+        const readStream = new stream.Readable();
+        const buffer = new stream.Transform();
         options = this.setDefaultOptions(options);
         youtubeDlArguments = youtubeDlArguments.concat(["-o", "-"]);
-        readStream._read = function(){};
+        buffer._transform = function (chunk,encoding, cb){
+            this.push(chunk);
+            cb();
+        }
         const youtubeDlProcess = spawn(this.binaryPath, youtubeDlArguments, options);
 
-        let processError = "";
-        let stderrData = "";
-        youtubeDlProcess.stdout.on("data", (data) => readStream.push(data));
-        youtubeDlProcess.stderr.on("data", (data) => stderrData += data.toString());
-        youtubeDlProcess.on("error", (error) => processError = error );
-        youtubeDlProcess.on("close", (code) => {
-            readStream.destroy(code == 0 ? false : "error - " + code + " - " + processError + " - " + stderrData);
+        youtubeDlProcess.stdout
+          .pipe(buffer);
+
+        [
+            'abort', 'request', 'response', 'error', 'redirect', 'retry', 'reconnect',
+        ].forEach(event => {
+            youtubeDlProcess.prependListener(event, buffer.emit.bind(buffer, event));
         });
-        return readStream;
+
+        return buffer;
     }
 
     parseProgress(progressLine)
