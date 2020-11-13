@@ -167,7 +167,6 @@ class YoutubeDlWrap
     }
 
     execStream(youtubeDlArguments = [], options = {}) {
-        const readStream = new stream.Readable();
         const buffer = new stream.Transform();
         options = this.setDefaultOptions(options);
         youtubeDlArguments = youtubeDlArguments.concat(["-o", "-"]);
