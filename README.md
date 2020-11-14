@@ -18,12 +18,9 @@ Provide it yourself or use some of the following functions to download the binar
 ```javascript
 const YoutubeDlWrap = require("youtube-dl-wrap");
 
-//Get the data from the github releases API. In this case get page 1 with a maximum of 5 items.
-let githubReleasesData = await YoutubeDlWrap.getGithubReleases(1, 5);
-
-//Download the youtube-dl binary for the given version and platform to the provided path.
-//By default the latest version will be downloaded to "./youtube-dl" and platform = os.platform().
-await YoutubeDlWrap.downloadYoutubeDl("path/to/youtube-dl/binary", "2020.06.16.1", "win32");
+//Downloads the latest youtube-dl binary for the given platform to the provided path.
+//By default the path will be "./youtube-dl" and platform will be os.platform().
+await YoutubeDlWrap.downloadLatestYoutubeDl("path/to/youtube-dl/binary", "win32");
 
 //Init an instance with a given binary path.
 //If none is provided "youtube-dl" will be used as command.
@@ -54,7 +51,9 @@ await youtubeDlWrap.execPromise(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
 
 //Execute and return a Readable Stream
 let readStream = youtubeDlWrap.execStream(["https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-    "-f", "best"]);  
+    "-f", "best"])
+  .on("progress", (progress) => 
+    console.log(progress.percent, progress.totalSize, progress.currentSpeed, progress.eta));  
 
 
 //Get the --dump-json metadata as object

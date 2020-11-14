@@ -23,43 +23,33 @@ class YoutubeDlWrap
         this.binaryPath = binaryPath;
     }
 
-    static getGithubReleases(page = 1, perPage = 1)
+    static downloadLatestYoutubeDl(filePath, platform = os.platform())
     {
-        return new Promise( (resolve, reject) =>
+        return new Promise(async (resolve, reject) =>
         {
-            const apiURL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases?page=" + page + "&per_page=" + perPage;
-            https.get(apiURL, { headers: { "User-Agent": "node" } }, (response) =>
-            {
-                let responseString = "";
-                response.setEncoding("utf8");
-                response.on("data", (body) => responseString += body);
-                response.on("error", (e) => reject(e));
-                response.on("end", () => response.statusCode == 200 ? resolve(JSON.parse(responseString)) : reject(response));
-            });
-        });
-    }
+            let fileName = platform == "win32" ? "youtube-dl.exe" : "youtube-dl";        
+            if(!filePath)
+                filePath = "./" + fileName;
+            let binaryURL = "https://youtube-dl.org/downloads/latest/" + fileName;
 
-    static async downloadYoutubeDl(filePath, version, platform = os.platform())
-    {
-        let fileName = platform == "win32" ? "youtube-dl.exe" : "youtube-dl";
-        if(!version)
-            version = (await YoutubeDlWrap.getGithubReleases(1, 1))[0].tag_name;
-        if(!filePath)
-            filePath = "./" + fileName;
-
-        return new Promise( (resolve, reject) =>
-        {
-            let binaryURL = "https://github.com/ytdl-org/youtube-dl/releases/download/" + version + "/" + fileName;
-            https.get(binaryURL, (redirectResponse) =>
+            while(binaryURL)
             {
-                redirectResponse.on("error", (e) => reject(e));
-                https.get(redirectResponse.headers.location, (binaryResponse) =>
+                let response = await new Promise((resolveRequest, rejectRequest) => 
+                    https.get(binaryURL, (httpResponse) => {
+                        httpResponse.on("error", (e) => rejectRequest(e));
+                        resolveRequest(httpResponse);
+                }));
+
+                if(response.headers.location)
+                    binaryURL = response.headers.location;
+                else
                 {
-                    binaryResponse.pipe(fs.createWriteStream(filePath));
-                    binaryResponse.on("error", (e) => reject(e));
-                    binaryResponse.on("end", () => binaryResponse.statusCode == 200 ? resolve(binaryResponse) : reject(binaryResponse));
-                });
-            });
+                    binaryURL = null
+                    response.pipe(fs.createWriteStream(filePath));
+                    response.on("error", (e) => reject(e));
+                    response.on("end", () => response.statusCode == 200 ? resolve(response) : reject(response));
+                }
+            }
         });
     }
 
@@ -123,7 +113,6 @@ class YoutubeDlWrap
         {
             let stringData = data.toString();
             let parsedProgress = this.parseProgress(stringData);
-            
             if(parsedProgress)
                 execEventEmitter.emit("progress", parsedProgress);
 
@@ -165,6 +154,7 @@ class YoutubeDlWrap
             });
         });
     }
+
 
     execStream(youtubeDlArguments = [], options = {}) {
         const buffer = new stream.Transform();
