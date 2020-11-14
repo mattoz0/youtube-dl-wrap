@@ -68,7 +68,7 @@ describe("stream function", function()
         let stdoutReadstream = youtubeDlWrap.execStream(["https://www.youtube.com/watch?v=C0DPdy98e4c",
             "-f", "worst"]);
         stdoutReadstream.pipe(fs.createWriteStream("test/testVideoStream.mp4"));
-        stdoutReadstream.on("close", () => 
+        stdoutReadstream.on("finish", () =>
         {
             assert(fs.existsSync("test/testVideoStream.mp4"));
             const stats = fs.statSync("test/testVideoStream.mp4");
