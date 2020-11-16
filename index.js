@@ -177,7 +177,7 @@ class YoutubeDlWrap
 
         youtubeDlProcess.on('close',()=>{
             youtubeDlProcess.removeAllListeners();
-        })
+        });
 
         return buffer;
     }
