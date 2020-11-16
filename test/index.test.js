@@ -63,7 +63,7 @@ describe("stream function", function()
                progressDefined = false;
 
         });
-        stdoutReadstream.on("finish", () =>
+        stdoutReadstream.on("close", () =>
         {
             assert(fs.existsSync("test/testVideoStream.mp4"));
             const stats = fs.statSync("test/testVideoStream.mp4");
