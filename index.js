@@ -170,10 +170,14 @@ class YoutubeDlWrap
           .pipe(buffer);
 
         [
-            'close', 'disconnect', 'close', 'error', 'exit', 'message', 'spawn',
+            'close', 'disconnect', 'close', 'error', 'exit', 'message', 'spawn'
         ].forEach(event => {
             youtubeDlProcess.prependListener(event, buffer.emit.bind(buffer, event));
         });
+
+        youtubeDlProcess.on('close',()=>{
+            youtubeDlProcess.removeAllListeners();
+        })
 
         return buffer;
     }
